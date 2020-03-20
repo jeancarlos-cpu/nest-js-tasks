@@ -1,17 +1,18 @@
-import { PipeTransform, NotFoundException } from '@nestjs/common';
+import { PipeTransform, BadRequestException } from '@nestjs/common';
 import { TaskStatus } from '../task.model';
 
 export class TaskStatusValidationPipe implements PipeTransform {
-  readonly allowedStatuses = [
-    TaskStatus.OPEN,
-    TaskStatus.IN_PROGRESS,
-    TaskStatus.DONE,
-  ];
+  readonly allowedStatuses = Object.keys(TaskStatus).filter(
+    status => typeof status === 'string',
+  );
 
   transform(value: any) {
+    if (!value) {
+      throw new BadRequestException();
+    }
     value = value.toUpperCase();
     if (!this.isStatusValid(value)) {
-      throw new NotFoundException();
+      throw new BadRequestException();
     }
     return value;
   }
